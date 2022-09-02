@@ -27,21 +27,13 @@ type Partner struct {
 	Lat                float32
 	Lng                float32
 	Radius             float32
-	Sqm                float32
 	Rating             float32
 	FlooringExperience string
 }
 
 type PartnerWithDistance struct {
-	Id                 int16
-	Name               string
-	Lat                float32
-	Lng                float32
-	Radius             float32
-	Sqm                float32
-	Rating             float32
-	FlooringExperience string
-	Distance           float32
+	Partner  Partner
+	Distance float32
 }
 
 // @title Fiber Swagger Example API
@@ -146,7 +138,7 @@ func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 	recs := make([]*Partner, 0)
 	for rows.Next() {
 		rec := new(Partner)
-		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Sqm, &rec.Rating, &rec.FlooringExperience)
+		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Rating, &rec.FlooringExperience)
 		//e, err := json.Marshal(rec)
 		//if err != nil {
 		//	log.Fatal(err)
@@ -207,7 +199,7 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	recs := make([]*PartnerWithDistance, 0)
 	for rows.Next() {
 		rec := new(PartnerWithDistance)
-		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Sqm, &rec.Rating, &rec.FlooringExperience, &rec.Distance)
+		err := rows.Scan(&rec.Partner.Id, &rec.Partner.Name, &rec.Partner.Lat, &rec.Partner.Lng, &rec.Partner.Radius, &rec.Partner.Rating, &rec.Partner.FlooringExperience, &rec.Distance)
 		//e, err := json.Marshal(rec)
 		//if err != nil {
 		//	log.Fatal(err)
@@ -239,9 +231,9 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 
 func querySql(lat, lng float64) string {
 	return fmt.Sprintf(
-		"select\n    Id, Name, Lat, Lng, Radius, Sqm, Rating, flooring_experience AS FlooringExperience,\n    getDistance(%f, %f, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance(%f, %f, Lat, Lng) < Radius\norder by\n    Rating DESC,\n    Distance;", lat, lng, lat, lng)
+		"select\n    Id, Name, Lat, Lng, Radius, Rating, flooring_experience AS FlooringExperience,\n    getDistance(%f, %f, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance(%f, %f, Lat, Lng) < Radius\norder by\n    Rating DESC,\n    Distance;", lat, lng, lat, lng)
 }
 
 func partnerSql() string {
-	return "select\n    Id, Name, Lat, Lng, Radius, Sqm, Rating, flooring_experience AS FlooringExperience\nfrom\n    partners\nwhere\n    id = $1;"
+	return "select\n    Id, Name, Lat, Lng, Radius, Rating, flooring_experience AS FlooringExperience\nfrom\n    partners\nwhere\n    id = $1;"
 }
