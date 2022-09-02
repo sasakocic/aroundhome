@@ -60,6 +60,14 @@ type PartnerWithDistance struct {
 // @BasePath /
 // @schemes http
 func main() {
+	db := databaseConnect()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(db)
+
 	// Fiber instance
 	app := fiber.New()
 
@@ -69,8 +77,12 @@ func main() {
 	// Routes
 	app.Get("/", HealthCheck)
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
-	app.Get("/partners/*", Partners)
-	app.Get("/query/*", Query)
+	app.Get("/partners/*", func(ctx *fiber.Ctx) error {
+		return partnersHandler(ctx, db)
+	})
+	app.Get("/query/*", func(ctx *fiber.Ctx) error {
+		return queryHandler(ctx, db)
+	})
 
 	// Start Server
 	if err := app.Listen(":3000"); err != nil {
@@ -113,9 +125,7 @@ func HealthCheck(c *fiber.Ctx) error {
 	return nil
 }
 
-func Partners(c *fiber.Ctx) error {
-	db := databaseConnect()
-	defer db.Close()
+func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 	id, err := strconv.ParseInt(c.Query("id"), 10, 16)
 	if err != nil {
 		return err
@@ -166,9 +176,7 @@ func Partners(c *fiber.Ctx) error {
 	return nil
 }
 
-func Query(c *fiber.Ctx) error {
-	db := databaseConnect()
-	defer db.Close()
+func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	//qString := string(c.Request().URI().QueryString())
 	lat, err := strconv.ParseFloat(c.Query("lat"), 32)
 	if err != nil {
