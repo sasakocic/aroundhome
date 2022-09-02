@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"strconv"
 
 	_ "github.com/lib/pq"
 	"log"
@@ -21,6 +22,17 @@ const (
 )
 
 type Partner struct {
+	Id                 int16
+	Name               string
+	Lat                float32
+	Lng                float32
+	Radius             float32
+	Sqm                float32
+	Rating             float32
+	FlooringExperience string
+}
+
+type PartnerWithDistance struct {
 	Id                 int16
 	Name               string
 	Lat                float32
@@ -58,6 +70,7 @@ func main() {
 	app.Get("/", HealthCheck)
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
 	app.Get("/partners/*", Partners)
+	app.Get("/query/*", Query)
 
 	// Start Server
 	if err := app.Listen(":3000"); err != nil {
@@ -103,8 +116,75 @@ func HealthCheck(c *fiber.Ctx) error {
 func Partners(c *fiber.Ctx) error {
 	db := databaseConnect()
 	defer db.Close()
-	sqlQuery := buildSql(40.076762, 113.300129)
+	id, err := strconv.ParseInt(c.Query("id"), 10, 16)
+	if err != nil {
+		return err
+	}
 	//result, err := db.Exec(sqlQuery)
+	rows, err := db.Query(partnerSql(), id)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(rows)
+
+	recs := make([]*Partner, 0)
+	for rows.Next() {
+		rec := new(Partner)
+		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Sqm, &rec.Rating, &rec.FlooringExperience)
+		//e, err := json.Marshal(rec)
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//log.Fatal(e)
+		if err != nil {
+			log.Fatal(err)
+		}
+		recs = append(recs, rec)
+	}
+	//e, err := json.Marshal(recs)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(e)
+
+	//log.Fatal(recs)
+
+	//res := map[string]interface{}{
+	//	"test": "ok",
+	//}
+
+	if err := c.JSON(recs[0]); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Query(c *fiber.Ctx) error {
+	db := databaseConnect()
+	defer db.Close()
+	//qString := string(c.Request().URI().QueryString())
+	lat, err := strconv.ParseFloat(c.Query("lat"), 32)
+	if err != nil {
+		return err
+	}
+	lng, err := strconv.ParseFloat(c.Query("lng"), 32)
+	if err != nil {
+		return err
+	}
+	//fmt.Println(qString)
+	//log.Fatal(qString)
+	sqlQuery := querySql(lat, lng)
+	//if err := c.JSON(sqlQuery); err != nil {
+	//	return err
+	//}
+
 	rows, err := db.Query(sqlQuery)
 	if err != nil {
 		return err
@@ -116,9 +196,9 @@ func Partners(c *fiber.Ctx) error {
 		}
 	}(rows)
 
-	recs := make([]*Partner, 0)
+	recs := make([]*PartnerWithDistance, 0)
 	for rows.Next() {
-		rec := new(Partner)
+		rec := new(PartnerWithDistance)
 		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Sqm, &rec.Rating, &rec.FlooringExperience, &rec.Distance)
 		//e, err := json.Marshal(rec)
 		//if err != nil {
@@ -149,7 +229,11 @@ func Partners(c *fiber.Ctx) error {
 	return nil
 }
 
-func buildSql(lat, lng float32) string {
+func querySql(lat, lng float64) string {
 	return fmt.Sprintf(
-		"select\n    Id, Name, Lat, Lng, Radius, Sqm, Rating, flooring_experience AS FlooringExperience,\n    getDistance(%f, %f, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance(40.076762, 113.300129, Lat, Lng) < Radius\norder by\n    Rating DESC,\n    Distance;", lat, lng)
+		"select\n    Id, Name, Lat, Lng, Radius, Sqm, Rating, flooring_experience AS FlooringExperience,\n    getDistance(%f, %f, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance(%f, %f, Lat, Lng) < Radius\norder by\n    Rating DESC,\n    Distance;", lat, lng, lat, lng)
+}
+
+func partnerSql() string {
+	return "select\n    Id, Name, Lat, Lng, Radius, Sqm, Rating, flooring_experience AS FlooringExperience\nfrom\n    partners\nwhere\n    id = $1;"
 }
