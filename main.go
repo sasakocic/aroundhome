@@ -22,8 +22,8 @@ type Partner struct {
 	Lat                float32
 	Lng                float32
 	Radius             float32
-	Rating             float32
-	FlooringExperience string
+	Rating             float32 `minimum:"0" maximum:"10" default:"0"`
+	FlooringExperience string  `enums:"carpet,tiles,wood"`
 }
 
 type PartnerWithDistance struct {
@@ -135,6 +135,15 @@ func HealthCheck(c *fiber.Ctx) error {
 	return nil
 }
 
+// partnersHandler godoc
+// @Summary Get partners data for a given id.
+// @Description Returns partners data for an id as integer.
+// @Tags partners
+// @Accept */*
+// @Produce json
+// @Param id  path int true "Partner ID"
+// @Success 200 {object} map[string]interface{}
+// @Router /partners/{id} [get]
 func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 16)
 	if err != nil {
@@ -167,6 +176,18 @@ func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 	return nil
 }
 
+// queryHandler godoc
+// @Summary Get list of partners that satisfy given query.
+// @Description Returns list of partners that satisfy given query.
+// @Tags query
+// @Accept */*
+// @Produce json
+// @Param phone  query string false "Phone number for contact" example(01604323444)
+// @Param sqm  query decimal false "Square meters" example(65.22)
+// @Param address  query string true "Address in format: Latitude,Longitude" example(40.076763,113.30013)
+// @Param material query []string true "Material collection: carpet,tiles,wood" collectionFormat(csv) example(carpet,tiles,wood)
+// @Success 200 {object} map[string]interface{}
+// @Router /query/{id} [get]
 func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	//qString := string(c.Request().URI().QueryString())
 	phone := c.Query("phone", "")
