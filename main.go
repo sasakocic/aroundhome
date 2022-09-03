@@ -155,11 +155,12 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	//qString := string(c.Request().URI().QueryString())
 	phone := c.Query("phone", "")
 	sqm := c.Query("sqm", "")
-	lat, err := strconv.ParseFloat(c.Query("lat"), 32)
+	address := strings.Split(c.Query("address", "0,0"), ",")
+	lat, err := strconv.ParseFloat(address[0], 32)
 	if err != nil {
 		return err
 	}
-	lng, err := strconv.ParseFloat(c.Query("lng"), 32)
+	lng, err := strconv.ParseFloat(address[1], 32)
 	if err != nil {
 		return err
 	}
