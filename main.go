@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
@@ -166,6 +167,12 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	}
 	material := strings.Split(c.Query("material"), ",")
 	sort.Strings(material)
+	// prevent SQL injection by strictly checking types of material
+	for _, v := range material {
+		if v != "carpet" && v != "tiles" && v != "wood" {
+			return errors.New("material " + v + " is not allowed in query")
+		}
+	}
 	// manually injecting materials into sql because JSON array is changed during injection into db.Query
 	materialString := "'" + strings.Join(material, `','`) + "'"
 	rows, err := db.Query(querySql(materialString), lat, lng)
