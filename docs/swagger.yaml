@@ -29,6 +29,65 @@ paths:
       summary: Show the status of server.
       tags:
       - root
+  /partners/{id}:
+    get:
+      consumes:
+      - '*/*'
+      description: Returns partners data for an id as integer.
+      parameters:
+      - description: Partner ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get partners data for a given id.
+      tags:
+      - partners
+  /query/{id}:
+    get:
+      consumes:
+      - '*/*'
+      description: Returns list of partners that satisfy given query.
+      parameters:
+      - description: Phone number for contact
+        example: "01604323444"
+        in: query
+        name: phone
+        type: string
+      - description: 'Address in format: Latitude,Longitude'
+        example: 40.076763,113.30013
+        in: query
+        name: address
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 'Material collection: carpet,tiles,wood'
+        example: carpet,tiles,wood
+        in: query
+        items:
+          type: string
+        name: material
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get list of partners that satisfy given query.
+      tags:
+      - query
 schemes:
 - http
 swagger: "2.0"
