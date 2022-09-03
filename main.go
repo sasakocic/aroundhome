@@ -153,6 +153,8 @@ func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 
 func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	//qString := string(c.Request().URI().QueryString())
+	phone := c.Query("phone", "")
+	sqm := c.Query("sqm", "")
 	lat, err := strconv.ParseFloat(c.Query("lat"), 32)
 	if err != nil {
 		return err
@@ -190,7 +192,12 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 		}
 		recs = append(recs, rec)
 	}
-	if err := c.JSON(recs); err != nil {
+	response := map[string]interface{}{
+		"phone":    phone,
+		"partners": recs,
+		"sqm":      sqm,
+	}
+	if err := c.JSON(response); err != nil {
 		return err
 	}
 
