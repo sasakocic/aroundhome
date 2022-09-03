@@ -7,7 +7,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"sort"
 	"strconv"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"log"
@@ -122,7 +124,6 @@ func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	//result, err := db.Exec(sqlQuery)
 	rows, err := db.Query(partnerSql(), id)
 	if err != nil {
 		log.Fatal(err)
@@ -134,33 +135,15 @@ func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
 			log.Fatal(err)
 		}
 	}(rows)
-
 	recs := make([]*Partner, 0)
 	for rows.Next() {
 		rec := new(Partner)
 		err := rows.Scan(&rec.Id, &rec.Name, &rec.Lat, &rec.Lng, &rec.Radius, &rec.Rating, &rec.FlooringExperience)
-		//e, err := json.Marshal(rec)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//log.Fatal(e)
 		if err != nil {
 			log.Fatal(err)
 		}
 		recs = append(recs, rec)
 	}
-	//e, err := json.Marshal(recs)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(e)
-
-	//log.Fatal(recs)
-
-	//res := map[string]interface{}{
-	//	"test": "ok",
-	//}
-
 	if err := c.JSON(recs[0]); err != nil {
 		return err
 	}
@@ -178,14 +161,11 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	//fmt.Println(qString)
-	//log.Fatal(qString)
-	sqlQuery := querySql(lat, lng)
-	//if err := c.JSON(sqlQuery); err != nil {
-	//	return err
-	//}
-
-	rows, err := db.Query(sqlQuery)
+	material := strings.Split(c.Query("material"), ",")
+	sort.Strings(material)
+	// manually injecting materials into sql because JSON array is changed during injection into db.Query
+	materialString := "'" + strings.Join(material, `','`) + "'"
+	rows, err := db.Query(querySql(materialString), lat, lng)
 	if err != nil {
 		return err
 	}
@@ -210,18 +190,6 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 		}
 		recs = append(recs, rec)
 	}
-	//e, err := json.Marshal(recs)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(e)
-
-	//log.Fatal(recs)
-
-	//res := map[string]interface{}{
-	//	"test": "ok",
-	//}
-
 	if err := c.JSON(recs); err != nil {
 		return err
 	}
@@ -229,9 +197,8 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 	return nil
 }
 
-func querySql(lat, lng float64) string {
-	return fmt.Sprintf(
-		"select\n    Id, Name, Lat, Lng, Radius, Rating, flooring_experience AS FlooringExperience,\n    getDistance(%f, %f, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance(%f, %f, Lat, Lng) < Radius\norder by\n    Rating DESC,\n    Distance;", lat, lng, lat, lng)
+func querySql(materialString string) string {
+	return fmt.Sprintf("select\n    Id, Name, Lat, Lng, Radius, Rating, flooring_experience AS FlooringExperience,\n    getDistance($1, $2, Lat, Lng) AS Distance\nfrom\n    partners\nwhere\n    getDistance($1, $2, Lat, Lng) < Radius AND flooring_experience @> ARRAY[%s]\norder by\n    Rating DESC,\n    Distance;", materialString)
 }
 
 func partnerSql() string {
