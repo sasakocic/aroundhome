@@ -71,7 +71,7 @@ func main() {
 	// Routes
 	app.Get("/", HealthCheck)
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
-	app.Get("/partners/*", func(ctx *fiber.Ctx) error {
+	app.Get("/partners/:id", func(ctx *fiber.Ctx) error {
 		return partnersHandler(ctx, db)
 	})
 	app.Get("/query/*", func(ctx *fiber.Ctx) error {
@@ -120,7 +120,7 @@ func HealthCheck(c *fiber.Ctx) error {
 }
 
 func partnersHandler(c *fiber.Ctx, db *sql.DB) error {
-	id, err := strconv.ParseInt(c.Query("id"), 10, 16)
+	id, err := strconv.ParseInt(c.Params("id"), 10, 16)
 	if err != nil {
 		return err
 	}
