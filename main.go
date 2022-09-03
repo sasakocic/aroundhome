@@ -8,20 +8,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 
 	_ "github.com/lib/pq"
 	"log"
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "aroundhome"
 )
 
 type Partner struct {
@@ -86,6 +79,29 @@ func main() {
 }
 
 func databaseConnect() *sql.DB {
+	host := os.Getenv("PG_HOSTNAME")
+	if host == "" {
+		host = "localhost"
+	}
+	port, err := strconv.ParseInt(os.Getenv("PG_PORT"), 10, 16)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if port == 0 {
+		port = 5432
+	}
+	user := os.Getenv("PG_USER")
+	if user == "" {
+		user = "postgres"
+	}
+	password := os.Getenv("PG_PASSWORD")
+	if password == "" {
+		password = "postgres"
+	}
+	dbname := os.Getenv("PG_DATABASE")
+	if dbname == "" {
+		dbname = "aroundhome"
+	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
