@@ -31,9 +31,9 @@ type PartnerWithDistance struct {
 	Distance float32
 }
 
-// @title Fiber Swagger Example API
+// @title Fiber Swagger API
 // @version 2.0
-// @description This is a sample server server.
+// @description This is an API server
 // @termsOfService http://swagger.io/terms/
 
 // @contact.Name API Support
@@ -62,8 +62,22 @@ func main() {
 	app.Use(recover.New())
 	app.Use(cors.New())
 	// Routes
+	app.Static("/docs", "./docs")
 	app.Get("/", HealthCheck)
-	app.Get("/swagger/*", swagger.HandlerDefault) // default
+	//app.Get("/swagger/*", swagger.HandlerDefault)     // default
+	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+		URL:         "/docs/swagger.json",
+		DeepLinking: false,
+		// Expand ("list") or Collapse ("none") tag groups by default
+		DocExpansion: "none",
+		// Prefill OAuth ClientId on Authorize popup
+		OAuth: &swagger.OAuthConfig{
+			AppName:  "OAuth Provider",
+			ClientId: "21bb4edc-05a7-4afc-86f1-2e151e4ba6e2",
+		},
+		// Ability to change OAuth2 redirect uri location
+		OAuth2RedirectUrl: "http://localhost:8080/swagger/oauth2-redirect.html",
+	}))
 	app.Get("/partners/:id", func(ctx *fiber.Ctx) error {
 		return partnersHandler(ctx, db)
 	})
