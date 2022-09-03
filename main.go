@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -182,7 +181,6 @@ func queryHandler(c *fiber.Ctx, db *sql.DB) error {
 		return err
 	}
 	material := strings.Split(c.Query("material"), ",")
-	sort.Strings(material)
 	// prevent SQL injection by strictly checking types of material
 	for _, v := range material {
 		if v != "carpet" && v != "tiles" && v != "wood" {
