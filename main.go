@@ -86,7 +86,11 @@ func main() {
 	})
 
 	// Start Server
-	if err := app.Listen(":3000"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	if err := app.Listen(":" + port); err != nil {
 		log.Fatal(err)
 	}
 }
