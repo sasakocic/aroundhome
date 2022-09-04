@@ -78,11 +78,11 @@ func main() {
 	})
 
 	// Start Server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
+	webport := os.Getenv("PORT")
+	if webport == "" {
+		webport = "3000"
 	}
-	if err := app.Listen(":" + port); err != nil {
+	if err := app.Listen(":" + webport); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -92,12 +92,13 @@ func databaseConnect() *sql.DB {
 	if host == "" {
 		host = "localhost"
 	}
-	port, err := strconv.ParseInt(os.Getenv("PG_PORT"), 10, 16)
+	pgPort := os.Getenv("PG_PORT")
+	if pgPort == "" {
+		pgPort = "5432"
+	}
+	port, err := strconv.ParseInt(pgPort, 10, 16)
 	if err != nil {
 		log.Fatal(err)
-	}
-	if port == 0 {
-		port = 5432
 	}
 	user := os.Getenv("PG_USER")
 	if user == "" {
