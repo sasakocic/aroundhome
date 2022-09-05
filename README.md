@@ -189,7 +189,7 @@ $$ language plpgsql
 Dummy data generated with [Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel](https://www.mockaroo.com/) and imported with
 
 ```sql
-COPY partners(id, name, lat, lng, radius, sqm, rating)
+COPY partners(id,name,lat,lng,radius,rating,flooring_experience)
 FROM './db/partners.csv'
 DELIMITER ','
 CSV HEADER;
