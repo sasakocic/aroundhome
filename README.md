@@ -195,6 +195,8 @@ DELIMITER ','
 CSV HEADER;
 ```
 
+Or we can use CREATE and INSERT statements from `db/seed.sql`
+
 This model would allow a queries like
 
 ```sql
