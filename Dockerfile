@@ -1,7 +1,8 @@
-FROM golang:1.19.0-alpine AS build
+FROM golang:1.19.0-alpine3.16 AS build
 
 WORKDIR /app
 
+FROM build as dev
 # Install git.
 # Git is required for fetching the dependencies.
 RUN apk update \
@@ -23,14 +24,12 @@ COPY ./db ./db/
 COPY ./docs ./docs/
 COPY ./main.go ./
 
-RUN go build -o /app/docker-gs-ping
+RUN go build -o /app/aroundhome
 
-#FROM build as dev
+FROM alpine:3.16 AS release
+WORKDIR /app
+COPY --from=dev /app/aroundhome ./
 
-COPY docker-gs-ping ./
-
-
-CMD ["./docker-gs-ping"]
-#CMD ["go", "run", "./main.go"]
+CMD ["./aroundhome"]
 
 EXPOSE 3000

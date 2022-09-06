@@ -315,3 +315,10 @@ The following environment variables are used with defaults in parentheses:
 - PG_USER for PostgreSQL user (postgres)
 - PG_PASSWORD for PostgreSQL password (postgres)
 - PG_DATABASE for PostgreSQL database name (aroundhome)
+
+The environment for Docker can be copied from the .env.example to .env and adjusted.
+
+Use [Use Docker Compose | Docker Documentation](https://docs.docker.com/get-started/08_using_compose/)
+
+    docker-compose up
+
