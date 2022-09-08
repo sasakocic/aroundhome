@@ -5,12 +5,12 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample server server.
+  description: This is an API server
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Fiber Swagger Example API
+  title: Fiber Swagger API
   version: "2.0"
 paths:
   /:
