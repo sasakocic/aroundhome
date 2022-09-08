@@ -13,6 +13,9 @@ github.com/andybalholm/brotli
 github.com/arsmn/fiber-swagger/v2
 # github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d
 ## explicit; go 1.12
+# github.com/davecgh/go-spew v1.1.1
+## explicit
+github.com/davecgh/go-spew/spew
 # github.com/ghodss/yaml v1.0.0
 ## explicit
 # github.com/go-openapi/jsonpointer v0.19.5
@@ -61,10 +64,16 @@ github.com/lib/pq/scram
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
+# github.com/pmezard/go-difflib v1.0.0
+## explicit
+github.com/pmezard/go-difflib/difflib
 # github.com/russross/blackfriday/v2 v2.0.1
 ## explicit
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 ## explicit
+# github.com/stretchr/testify v1.8.0
+## explicit; go 1.13
+github.com/stretchr/testify/assert
 # github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
 ## explicit; go 1.15
 github.com/swaggo/files
