@@ -144,8 +144,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:3000",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "Fiber Swagger Example API",
-	Description:      "This is a sample server server.",
+	Title:            "Fiber Swagger API",
+	Description:      "This is an API server",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
